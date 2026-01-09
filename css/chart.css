@@ -507,7 +507,7 @@ svg text {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 40px;
+    gap: 44px;
     height: 250px;
     text-align: left;
 }

@@ -72,7 +72,7 @@ function applyFilter() {
     let result = null;
 
     // Obtenim les dades amb els filtres dels sliders
-    result = queryFilter(original_data)
+    result = queryFilter(original_data);
 
     //Assignem el contaminant actual mitjançant el seu slider
     if(currentPollutant == null){
@@ -102,20 +102,6 @@ function queryFilter(base){
     activeKeys.forEach(key => {
         result = result.filter(d => d[key] === filtDict[key]);
     });
-
-
-    // Acumulat de morts i mitjana des de l'any actual cap enrere
-    const acumulatFiltrat = base
-        .filter(d => d.TIME_PERIOD <= currentYear)
-        .filter(d => d.PIB_per_capita <= currentPIBThreshold)
-        .filter(d => activeKeys.every(k => d[k] === filtDict[k]));
-
-        agg_deaths_mean = 0;
-        agg_deaths_total = d3.sum(acumulatFiltrat, d => d.total_deaths);
-        if (agg_deaths_total > 0) {
-            agg_deaths_mean = d3.mean(acumulatFiltrat, d => d.total_deaths);
-        }
-
 
     // Agrupació, igual que en R
     const groupedData = d3.rollups(
@@ -161,10 +147,23 @@ function queryFilter(base){
 
     // Si l'usuari no toca l'slider del PIB o està ajustant els altres sliders,
     // l'ajustarem amb els colors de l'escala del PIB
-    if(!pibSliderSelected){
+    if(!pibSliderSelected && result.length > 0){
         // Valor màxim
         currentPIBThreshold = d3.max(result, d => d.PIB_per_capita);
     }
+
+    // Acumulat de morts i mitjana des de l'any actual cap enrere
+    const acumulatFiltrat = base
+        .filter(d => d.TIME_PERIOD <= currentYear)
+        .filter(d => d.PIB_per_capita <= currentPIBThreshold)
+        .filter(d => activeKeys.every(k => d[k] === filtDict[k]));
+
+    agg_deaths_mean = 0;
+    agg_deaths_total = d3.sum(acumulatFiltrat, d => d.total_deaths);
+    if (agg_deaths_total > 0) {
+        agg_deaths_mean = d3.mean(acumulatFiltrat, d => d.total_deaths);
+    }
+
     result = result.filter(d => d.PIB_per_capita <= currentPIBThreshold);
 
     return result;
